@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./styles.css";
-import { Admin, ListGuesser, Resource } from "react-admin";
+import { Admin, Resource } from "react-admin";
 import jsonServerProvider from "ra-data-json-server";
 
 // pages

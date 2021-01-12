@@ -1,5 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { queryReducer } from "react-admin";
+import lodashDebounce from 'lodash/debounce';
+import set from 'lodash/set';
+import { queryReducer, removeEmpty, removeKey } from "react-admin";
+import {SORT_ASC, SET_SORT, SET_PAGE, SET_PER_PAGE, SET_FILTER} from 'ra-core/esm/reducer/admin/resource/list/queryReducer';
 
 const emptyObject = {};
 const defaultSort = {
@@ -16,7 +19,7 @@ const useIsolateListParams = ({
     debounce = 500,
 }) => {
     const [params, setParams] = useState(defaultParams);
-    // 쿼리에 필요한 파라미터들 모임 인가?
+    // 기본 값 모음
     const requestSignature = [
         resource,
         params,
@@ -38,6 +41,72 @@ const useIsolateListParams = ({
         const newParams = queryReducer(query, action); // <--
         setParams(newParams);
     }, requestSignature);
+
+    ///
+    /// 상태 변경, set params
+    ///
+
+    // 정렬
+    const setSort = useCallback((newSort) => changeParams({type: SET_SORT, payload: {sort: newSort}}), requestSignature);
+
+    // 페이징
+    const setPage = useCallback((newPage) => changeParams({type: SET_PAGE, payload: newPage}), requestSignature);
+    const setPerPage = useCallback((newPerPage) => changeParams({type: SET_PER_PAGE, payload: newPerPage}), requestSignature);
+
+    // 필터
+    const filterValues = query.filter || emptyObject;
+    const displayedFilterValues = query.displayedFilters || emptyObject;
+    // 필터 - 입력대기 
+    const debounceSetFilters = lodashDebounce((newFilters, newDisplayedFilters) => {
+        let payload = {
+            filter: removeEmpty(newFilters),
+            displayedFilters: undefined,
+        };
+        if (newDisplayedFilters) {
+            payload.displayedFilters = Object
+                .keys(newDisplayedFilters)
+                .reduce((filters, filter) => {
+                    return newDisplayedFilters[filter] ? { ...filters, [filter]: true } : filters;
+                }, {});
+        }
+        changeParams({
+            type: SET_FILTER,
+            payload
+        })
+    }, debounce);
+    const setFilters = useCallback((filters, displayedFilters) => debounceSetFilters(filters, displayedFilters), requestSignature);
+    const hideFilter = useCallback((filterName) => {
+        const newFilters = removeKey(filterValues, filterName);
+        const newDisplayedFilters = {
+            ...displayedFilterValues, [filterName]: undefined
+        }
+        setFilters(newFilters, newDisplayedFilters);
+    }, requestSignature);
+    const showFilter = useCallback((filterName, defaultValue) => {
+        const newFilters = set(filterValues, filterName, defaultValue);
+        const newDisplayedFilters = {
+            ...displayedFilterValues, [filterName]: undefined
+        }
+        setFilters(newFilters, newDisplayedFilters);
+    }, requestSignature);
+
+    return [
+        {
+            displayedFilters: displayedFilterValues,
+            filterValues,
+            requestSignature,
+            ...query,
+        },
+        {
+            changeParams,
+            setPage,
+            setPerPage,
+            setSort,
+            setFilters,
+            hideFilter,
+            showFilter,
+        },
+    ];
 }
 
 export const hasCustomParams = (params) => {

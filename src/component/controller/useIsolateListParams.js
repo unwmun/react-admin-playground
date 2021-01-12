@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { queryReducer } from "react-admin";
 
 const emptyObject = {};
 const defaultSort = {
@@ -23,7 +24,20 @@ const useIsolateListParams = ({
         JSON.stringify(sort),
         perPage
     ];
-    const query = useMemo(() => {})
+    const query = useMemo(() => // <---
+        getQuery({
+            params,
+            filterDefaultValues, 
+            sort, 
+            perPage
+        }),
+        requestSignature
+    );
+
+    const changeParams = useCallback(action => {
+        const newParams = queryReducer(query, action); // <--
+        setParams(newParams);
+    }, requestSignature);
 }
 
 export const hasCustomParams = (params) => {

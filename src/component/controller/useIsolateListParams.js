@@ -45,7 +45,6 @@ const useIsolateListParams = ({
     ///
     /// 상태 변경, set params
     ///
-
     // 정렬
     const setSort = useCallback((newSort) => changeParams({type: SET_SORT, payload: {sort: newSort}}), requestSignature);
 
@@ -153,3 +152,5 @@ export const getNumberOrDefault = (possibleNumber, defaultValue) =>
     (typeof possibleNumber === 'string'
         ? parseInt(possibleNumber, 10)
         : possibleNumber) || defaultValue;
+
+export default useIsolateListParams;

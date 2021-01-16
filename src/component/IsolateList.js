@@ -61,9 +61,9 @@ export const IsolateList = ({children, ...props}) => {
             </Filter>
             {cloneElement(children)}
             <Pagination
-                page={page}
-                perPage={perPage}
-                setPage={setPage}
+                page={query.page}
+                perPage={query.perPage}
+                setPage={queryModifiers.setPage}
                 total={total}
             />
         </ListContextProvider>

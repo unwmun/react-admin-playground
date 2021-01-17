@@ -2,6 +2,7 @@ import React, { cloneElement, useState } from 'react';
 import { BulkActionsToolbar, Datagrid, List, ListBase, ListContextProvider, ListToolbar, Pagination, TextField, TextInput } from 'react-admin';
 import { Dialog, DialogTitle, DialogContent, Card } from '@material-ui/core';
 import { useForm } from 'react-final-form';
+import { IsolateList } from '../../component/IsolateList';
 
 export const AlbumInput = (props) => {
     const { dialogTitle, dialogContent, record } = props;
@@ -28,7 +29,7 @@ export const AlbumInput = (props) => {
                 onClose={handleCloseClick}
             >
                 <DialogTitle>{dialogTitle}</DialogTitle>
-                <DialogContent><AlbumSelectList2 rowClick={handleRowClick} /></DialogContent>
+                <DialogContent><AlbumSelectList3 rowClick={handleRowClick} basePath="/albums" resource='albums'/></DialogContent>
             </Dialog>
         </>
     )
@@ -77,5 +78,15 @@ const AlbumSelectList2 = (props) => {
             </Datagrid>
         </MyList>
     );
+}
 
+const AlbumSelectList3 = (props) => {
+    const { rowClick } = props;
+    return (
+        <IsolateList {...props}>
+            <Datagrid rowClick={rowClick}>
+                <TextField source="title" label="제에목"/>
+            </Datagrid>
+        </IsolateList>
+    )
 }

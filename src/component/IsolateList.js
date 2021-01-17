@@ -1,5 +1,5 @@
 import { Filter, ListContextProvider, Loading, Pagination, TextInput, useQuery } from "react-admin";
-import { cloneElement } from "react";
+import React, { cloneElement } from "react";
 import useIsolateListParams from "./controller/useIsolateListParams";
 import keyBy from 'lodash/keyBy';
 
